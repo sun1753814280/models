@@ -46,6 +46,10 @@ flags.DEFINE_multi_integer('atrous_rates', None,
 flags.DEFINE_integer('output_stride', 8,
                      'The ratio of input to output spatial resolution.')
 
+
+flags.DEFINE_integer('inf_batch_size', 1,
+                     'The batch_size for inference')
+
 # Change to [0.5, 0.75, 1.0, 1.25, 1.5, 1.75] for multi-scale inference.
 flags.DEFINE_multi_float('inference_scales', [1.0],
                          'The scales to resize images for inference.')
@@ -74,27 +78,41 @@ def _create_input_tensors():
     resized_image_size: Resized image shape tensor [height, width].
   """
   # input_preprocess takes 4-D image tensor as input.
-  input_image = tf.placeholder(tf.uint8, [1, None, None, 3], name=_INPUT_NAME)
+  input_image = tf.placeholder(tf.uint8, [FLAGS.inf_batch_size, None, None, 3], name=_INPUT_NAME)
   original_image_size = tf.shape(input_image)[1:3]
 
   # Squeeze the dimension in axis=0 since `preprocess_image_and_label` assumes
   # image to be 3-D.
-  image = tf.squeeze(input_image, axis=0)
-  resized_image, image, _ = input_preprocess.preprocess_image_and_label(
-      image,
-      label=None,
-      crop_height=FLAGS.crop_size[0],
-      crop_width=FLAGS.crop_size[1],
-      min_resize_value=FLAGS.min_resize_value,
-      max_resize_value=FLAGS.max_resize_value,
-      resize_factor=FLAGS.resize_factor,
-      is_training=False,
-      model_variant=FLAGS.model_variant)
-  resized_image_size = tf.shape(resized_image)[:2]
+  # image = tf.squeeze(input_image, axis=0)
+  # resize image one by one, the input images must have the same shape  hlc 018-11-5
+  multi_images = []
+  resized_image_size = None
+  for one_image in tf.unstack(input_image):
+      resized_image, one_image_out, _ = input_preprocess.preprocess_image_and_label(
+          one_image,
+          label=None,
+          crop_height=FLAGS.crop_size[0],
+          crop_width=FLAGS.crop_size[1],
+          min_resize_value=FLAGS.min_resize_value,
+          max_resize_value=FLAGS.max_resize_value,
+          resize_factor=FLAGS.resize_factor,
+          is_training=False,
+          model_variant=FLAGS.model_variant)
+      new_size = tf.shape(resized_image)[:2]
+      if resized_image_size is None:
+          resized_image_size = new_size
+      # if resized_image_size[0] != new_size[0] or resized_image_size[1] != new_size[1]:
+      #     print(resized_image_size, "!=",new_size)
+      #     raise ValueError("resized_image_size not equal to new_size")
+
+      multi_images.append(one_image_out)
+  # stack them
+  image = tf.stack(multi_images,axis=0)
+  print(image)
 
   # Expand the dimension in axis=0, since the following operations assume the
   # image to be 4-D.
-  image = tf.expand_dims(image, 0)
+  # image = tf.expand_dims(image, 0)
 
   return image, original_image_size, resized_image_size
 
@@ -130,7 +148,7 @@ def main(unused_argv):
     semantic_predictions = tf.slice(
         predictions[common.OUTPUT_TYPE],
         [0, 0, 0],
-        [1, resized_image_size[0], resized_image_size[1]])
+        [FLAGS.inf_batch_size, resized_image_size[0], resized_image_size[1]])
     # Resize back the prediction to the original image size.
     def _resize_label(label, label_size):
       # Expand dimension of label to [1, height, width, 1] for resize operation.
@@ -141,8 +159,11 @@ def main(unused_argv):
           method=tf.image.ResizeMethod.NEAREST_NEIGHBOR,
           align_corners=True)
       return tf.squeeze(resized_label, 3)
+    print(semantic_predictions)
     semantic_predictions = _resize_label(semantic_predictions, image_size)
+    print(semantic_predictions)
     semantic_predictions = tf.identity(semantic_predictions, name=_OUTPUT_NAME)
+    print(semantic_predictions)
 
     saver = tf.train.Saver(tf.model_variables())
 

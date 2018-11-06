@@ -17,6 +17,12 @@
 import os
 import tensorflow as tf
 
+
+# allow gpu memory to grow
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+
 from tensorflow.python.tools import freeze_graph
 from deeplab import common
 from deeplab import input_preprocess

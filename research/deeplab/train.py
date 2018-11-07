@@ -26,6 +26,11 @@ from deeplab.utils import input_generator
 from deeplab.utils import train_utils
 from deployment import model_deploy
 
+# allow gpu memory to grow
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+
 slim = tf.contrib.slim
 
 prefetch_queue = slim.prefetch_queue

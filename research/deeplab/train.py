@@ -292,7 +292,11 @@ def main(unused_argv):
   clone_batch_size = FLAGS.train_batch_size // config.num_clones
 
   tf.gfile.MakeDirs(FLAGS.train_logdir)
-  tf.logging.info('Training on %s set', FLAGS.train_split)
+  common.outputlogMessage('Training on %s set'%FLAGS.train_split)
+  common.outputlogMessage('Dataset: %s'%FLAGS.dataset)
+  common.outputlogMessage('train_crop_size: %s'%str(FLAGS.train_crop_size))
+  common.outputlogMessage(str(FLAGS.train_crop_size))
+  common.outputlogMessage('atrous_rates: %s'% str(FLAGS.atrous_rates))
 
   with tf.Graph().as_default() as graph:
     with tf.device(config.inputs_device()):

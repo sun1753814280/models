@@ -170,6 +170,24 @@ ORIGINAL_IMAGE = 'original_image'
 # Test set name.
 TEST_SET = 'test'
 
+logfile = 'deeplab_log.txt'
+import time
+def outputlogMessage(message):
+    """
+    output format log message
+    Args:
+        message: the message string need to be output
+
+    Returns:None
+
+    """
+    global logfile
+    timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime() )
+    outstr = timestr +': '+ message
+    print(outstr)
+    f=open(logfile,'a')
+    f.writelines(outstr+'\n')
+    f.close()
 
 class ModelOptions(
     collections.namedtuple('ModelOptions', [

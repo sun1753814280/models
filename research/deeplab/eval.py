@@ -90,6 +90,12 @@ flags.DEFINE_integer('max_number_of_evaluations', 0,
 def main(unused_argv):
   tf.logging.set_verbosity(tf.logging.INFO)
 
+  common.outputlogMessage('Evaluation on %s set'%FLAGS.eval_split)
+  common.outputlogMessage('Dataset: %s'%FLAGS.dataset)
+  common.outputlogMessage('eval_crop_size: %s'%str(FLAGS.eval_crop_size))
+  common.outputlogMessage(str(FLAGS.eval_crop_size))
+  common.outputlogMessage('atrous_rates: %s'% str(FLAGS.atrous_rates))
+
   dataset = data_generator.Dataset(
       dataset_name=FLAGS.dataset,
       split_name=FLAGS.eval_split,

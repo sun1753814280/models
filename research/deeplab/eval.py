@@ -86,6 +86,8 @@ flags.DEFINE_integer('max_number_of_evaluations', 0,
                      'Maximum number of eval iterations. Will loop '
                      'indefinitely upon nonpositive values.')
 
+flags.DEFINE_integer('num_classes', 21, 'Number of classes.')
+flags.DEFINE_integer('ignore_label', 255, 'Ignore label value.')
 
 def main(unused_argv):
   tf.logging.set_verbosity(tf.logging.INFO)
@@ -95,6 +97,8 @@ def main(unused_argv):
   common.outputlogMessage('eval_crop_size: %s'%str(FLAGS.eval_crop_size))
   common.outputlogMessage(str(FLAGS.eval_crop_size))
   common.outputlogMessage('atrous_rates: %s'% str(FLAGS.atrous_rates))
+  common.outputlogMessage('number of classes: %s'% str(FLAGS.num_classes))
+  common.outputlogMessage('Ignore label value: %s'% str(FLAGS.ignore_label))
 
   dataset = data_generator.Dataset(
       dataset_name=FLAGS.dataset,
@@ -109,7 +113,9 @@ def main(unused_argv):
       num_readers=2,
       is_training=False,
       should_shuffle=False,
-      should_repeat=False)
+      should_repeat=False,
+      num_classes=FLAGS.num_classes,
+      ignore_label=FLAGS.ignore_label)
 
   tf.gfile.MakeDirs(FLAGS.eval_logdir)
   tf.logging.info('Evaluating on %s set', FLAGS.eval_split)

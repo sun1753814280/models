@@ -132,7 +132,9 @@ class Dataset(object):
                num_readers=1,
                is_training=False,
                should_shuffle=False,
-               should_repeat=False):
+               should_repeat=False,
+               num_classes=21,
+               ignore_label=255):
     """Initializes the dataset.
 
     Args:
@@ -160,14 +162,14 @@ class Dataset(object):
     Raises:
       ValueError: Dataset name and split name are not supported.
     """
-    if dataset_name not in _DATASETS_INFORMATION:
-      raise ValueError('The specified dataset is not supported yet.')
+    # if dataset_name not in _DATASETS_INFORMATION:
+    #   raise ValueError('The specified dataset is not supported yet.')
     self.dataset_name = dataset_name
 
-    splits_to_sizes = _DATASETS_INFORMATION[dataset_name].splits_to_sizes
+    # splits_to_sizes = _DATASETS_INFORMATION[dataset_name].splits_to_sizes
 
-    if split_name not in splits_to_sizes:
-      raise ValueError('data split name %s not recognized' % split_name)
+    # if split_name not in splits_to_sizes:
+    #   raise ValueError('data split name %s not recognized' % split_name)
 
     if model_variant is None:
       tf.logging.warning('Please specify a model_variant. See '
@@ -190,8 +192,12 @@ class Dataset(object):
     self.should_shuffle = should_shuffle
     self.should_repeat = should_repeat
 
-    self.num_of_classes = _DATASETS_INFORMATION[self.dataset_name].num_classes
-    self.ignore_label = _DATASETS_INFORMATION[self.dataset_name].ignore_label
+    if self.dataset_name in _DATASETS_INFORMATION.keys():
+      self.num_of_classes = _DATASETS_INFORMATION[self.dataset_name].num_classes
+      self.ignore_label = _DATASETS_INFORMATION[self.dataset_name].ignore_label
+    else:
+      self.num_of_classes = num_classes
+      self.ignore_label = ignore_label
 
   def _parse_function(self, example_proto):
     """Function to parse the example proto.

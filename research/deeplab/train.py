@@ -222,6 +222,8 @@ flags.DEFINE_string('train_split', 'train',
 
 flags.DEFINE_string('dataset_dir', None, 'Where the dataset reside.')
 
+flags.DEFINE_integer('num_classes', 21, 'Number of classes.')
+flags.DEFINE_integer('ignore_label', 255, 'Ignore label value.')
 
 def _build_deeplab(iterator, outputs_to_num_classes, ignore_label):
   """Builds a clone of DeepLab.
@@ -297,6 +299,8 @@ def main(unused_argv):
   common.outputlogMessage('train_crop_size: %s'%str(FLAGS.train_crop_size))
   common.outputlogMessage(str(FLAGS.train_crop_size))
   common.outputlogMessage('atrous_rates: %s'% str(FLAGS.atrous_rates))
+  common.outputlogMessage('number of classes: %s'% str(FLAGS.num_classes))
+  common.outputlogMessage('Ignore label value: %s'% str(FLAGS.ignore_label))
 
   with tf.Graph().as_default() as graph:
     with tf.device(config.inputs_device()):
@@ -316,7 +320,9 @@ def main(unused_argv):
           num_readers=4,
           is_training=True,
           should_shuffle=True,
-          should_repeat=True)
+          should_repeat=True,
+          num_classes = FLAGS.num_classes,
+          ignore_label = FLAGS.ignore_label)
 
     # Create the global step on the device storing the variables.
     with tf.device(config.variables_device()):

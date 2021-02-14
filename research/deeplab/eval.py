@@ -29,6 +29,11 @@ from deeplab import common
 from deeplab import model
 from deeplab.datasets import data_generator
 
+# allow gpu memory to grow
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 

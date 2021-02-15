@@ -301,6 +301,9 @@ def main(unused_argv):
   common.outputlogMessage('atrous_rates: %s'% str(FLAGS.atrous_rates))
   common.outputlogMessage('number of classes: %s'% str(FLAGS.num_classes))
   common.outputlogMessage('Ignore label value: %s'% str(FLAGS.ignore_label))
+  pid = os.getpid()
+  with open('train_py_pid.txt', 'w') as f_obj:
+      f_obj.writelines('%d' % pid)
 
   with tf.Graph().as_default() as graph:
     with tf.device(config.inputs_device()):

@@ -36,8 +36,6 @@ flags.DEFINE_string('export_path', None,
 
 flags.DEFINE_integer('num_classes', 21, 'Number of classes.')
 
-flags.DEFINE_integer('band_count', 3, 'Number of the input image band.')
-
 flags.DEFINE_multi_integer('crop_size', [513, 513],
                            'Crop size [height, width].')
 
@@ -90,7 +88,7 @@ def _create_input_tensors():
     resized_image_size: Resized image shape tensor [height, width].
   """
   # input_preprocess takes 4-D image tensor as input.
-  input_image = tf.placeholder(tf.uint8, [1, None, None, FLAGS.band_count], name=_INPUT_NAME)
+  input_image = tf.placeholder(tf.uint8, [1, None, None, 3], name=_INPUT_NAME)
   original_image_size = tf.shape(input_image)[1:3]
 
   # Squeeze the dimension in axis=0 since `preprocess_image_and_label` assumes
